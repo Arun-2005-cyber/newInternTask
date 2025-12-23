@@ -80,5 +80,28 @@ const getProfile = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+const updateProfile = async (req, res) => {
+    try {
+        const { name, contact, gender } = req.body;
 
-module.exports = { register, login, getProfile };
+        const user = await User.findByIdAndUpdate(
+            req.userId,
+            { name, contact, gender },
+            { new: true }
+        ).select('-password');
+
+        if (!user)
+            return res.status(404).json({ success: false, message: 'User not found' });
+
+        // clear old cache
+        await redis.del(`user:${req.userId}`);
+
+        res.json({ success: true, user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+
+module.exports = { register, login, getProfile,updateProfile };
