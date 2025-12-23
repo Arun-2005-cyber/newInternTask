@@ -19,7 +19,7 @@ app.get('/health', (req, res) => {
 app.use('/api', require('./routes/auth')); // adjust route if needed
 
 // MongoDB connection
-const mongoURI = process.env.MONGO_URI; // must match Render env variable
+const mongoURI = process.env.MONGO_URI;
 const port = process.env.PORT || 5000;
 
 // Safety check
@@ -28,10 +28,8 @@ if (!mongoURI) {
   process.exit(1); // stop server if URI missing
 }
 
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// Connect to MongoDB (Mongoose v6+)
+mongoose.connect(mongoURI)
   .then(() => {
     console.log('MongoDB connected');
     app.listen(port, () => console.log(`Server running on port ${port}`));
