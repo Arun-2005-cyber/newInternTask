@@ -9,8 +9,7 @@ export default function Register() {
     email: "",
     password: "",
     gender: "",
-    userType: "",
-    termsAccepted: false,
+    userType: ""
   });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState("");
@@ -37,22 +36,32 @@ export default function Register() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  e.preventDefault();
+  if (!validate()) return;
 
-    setLoading(true);
-    try {
-      await API.post("/register", form);
-      setSuccess("Registered successfully!");
-      setTimeout(() => {
-        setSuccess("");
-        navigate("/login");
-      }, 1500);
-    } catch (err) {
-      setErrors({ submit: err.response?.data?.message || "Registration failed" });
-    }
-    setLoading(false);
-  };
+  setLoading(true);
+  try {
+    // Only send allowed fields to backend
+    const payload = {
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      gender: form.gender,
+      userType: form.userType
+    };
+
+    await API.post("/register", payload);
+
+    setSuccess("Registered successfully!");
+    setTimeout(() => {
+      setSuccess("");
+      navigate("/login");
+    }, 1500);
+  } catch (err) {
+    setErrors({ submit: err.response?.data?.message || "Registration failed" });
+  }
+  setLoading(false);
+};
 
   return (
     <div className="container mt-5">
@@ -91,12 +100,6 @@ export default function Register() {
             <option value="professional">Professional</option>
           </select>
           {errors.userType && <small className="text-danger">{errors.userType}</small>}
-
-          <div className="form-check mb-2">
-            <input className="form-check-input" type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={handleChange} />
-            <label className="form-check-label">I accept terms & conditions</label>
-          </div>
-          {errors.termsAccepted && <small className="text-danger">{errors.termsAccepted}</small>}
 
           <button className="btn btn-primary w-100" type="submit" disabled={loading}>
             {loading ? "Registering..." : "Register"}
